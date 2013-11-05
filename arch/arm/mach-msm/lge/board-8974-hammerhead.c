@@ -94,6 +94,26 @@ static void __init msm8974_early_memory(void)
 	of_scan_flat_dt(dt_scan_for_memory_hole, msm8974_reserve_table);
 }
 
+#ifdef CONFIG_BRICKED_THERMAL
+static struct msm_thermal_data msm_thermal_pdata = {
+	.sensor_id = 0,
+	.poll_ms = 400,
+	.shutdown_temp = 84,
+
+	.allowed_max_high = 80,
+	.allowed_max_low = 76,
+	.allowed_max_freq = 300000,
+
+	.allowed_mid_high = 77,
+	.allowed_mid_low = 72,
+	.allowed_mid_freq = 960000,
+
+	.allowed_low_high = 75,
+	.allowed_low_low = 69,
+	.allowed_low_freq = 1728000,
+};
+#endif
+
 #if defined(CONFIG_LCD_KCAL)
 extern int g_kcal_r;
 extern int g_kcal_g;
@@ -137,25 +157,6 @@ void __init lge_add_lcd_kcal_devices(void)
 {
 	pr_info (" LCD_KCAL_DEBUG : %s \n", __func__);
 	platform_device_register(&kcal_platrom_device);
-};
-
-#ifdef CONFIG_BRICKED_THERMAL
-static struct msm_thermal_data msm_thermal_pdata = {
-	.sensor_id = 0,
-	.poll_ms = 400,
-	.shutdown_temp = 84,
-
-	.allowed_max_high = 80,
-	.allowed_max_low = 76,
-	.allowed_max_freq = 300000,
-
-	.allowed_mid_high = 77,
-	.allowed_mid_low = 72,
-	.allowed_mid_freq = 960000,
-
-	.allowed_low_high = 75,
-	.allowed_low_low = 69,
-	.allowed_low_freq = 1728000,
 };
 #endif
 
