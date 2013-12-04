@@ -86,6 +86,7 @@ GTAGS
 *~
 \#*#
 Packages/
+build-boot.sh
 build-mahdi.sh
 build-mahdi-exp.sh
 kernel/usr/
