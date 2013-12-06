@@ -26,47 +26,47 @@
 static inline void
 __mutex_fastpath_lock(atomic_t *count, void (*fail_fn)(atomic_t *))
 {
-	int __ex_flag, __res;
+        int __ex_flag, __res;
 
-	__asm__ (
+        __asm__ (
 
-		"ldrex	%0, [%2]	\n\t"
-		"sub	%0, %0, #1	\n\t"
-		"strex	%1, %0, [%2]	"
+                "ldrex        %0, [%2]        \n\t"
+                "sub        %0, %0, #1        \n\t"
+                "strex        %1, %0, [%2]        "
 
-		: "=&r" (__res), "=&r" (__ex_flag)
-		: "r" (&(count)->counter)
-		: "cc","memory" );
+                : "=&r" (__res), "=&r" (__ex_flag)
+                : "r" (&(count)->counter)
+                : "cc","memory" );
 
-	__res |= __ex_flag;
-	if (unlikely(__res != 0))
-		fail_fn(count);
-	else
-		smp_rmb();
+        __res |= __ex_flag;
+        if (unlikely(__res != 0))
+                fail_fn(count);
+        else
+                smp_rmb();
 }
 
 static inline int
 __mutex_fastpath_lock_retval(atomic_t *count, int (*fail_fn)(atomic_t *))
 {
-	int __ex_flag, __res;
+        int __ex_flag, __res;
 
-	__asm__ (
+        __asm__ (
 
-		"ldrex	%0, [%2]	\n\t"
-		"sub	%0, %0, #1	\n\t"
-		"strex	%1, %0, [%2]	"
+                "ldrex        %0, [%2]        \n\t"
+                "sub        %0, %0, #1        \n\t"
+                "strex        %1, %0, [%2]        "
 
-		: "=&r" (__res), "=&r" (__ex_flag)
-		: "r" (&(count)->counter)
-		: "cc","memory" );
+                : "=&r" (__res), "=&r" (__ex_flag)
+                : "r" (&(count)->counter)
+                : "cc","memory" );
 
-	__res |= __ex_flag;
-	if (unlikely(__res != 0))
-		__res = fail_fn(count);
-	else
-		smp_rmb();
+        __res |= __ex_flag;
+        if (unlikely(__res != 0))
+                __res = fail_fn(count);
+        else
+                smp_rmb();
 
-	return __res;
+        return __res;
 }
 
 /*
@@ -77,29 +77,29 @@ __mutex_fastpath_lock_retval(atomic_t *count, int (*fail_fn)(atomic_t *))
 static inline void
 __mutex_fastpath_unlock(atomic_t *count, void (*fail_fn)(atomic_t *))
 {
-	int __ex_flag, __res, __orig;
+        int __ex_flag, __res, __orig;
 
-	smp_wmb();
-	__asm__ (
+        smp_wmb();
+        __asm__ (
 
-		"ldrex	%0, [%3]	\n\t"
-		"add	%1, %0, #1	\n\t"
-		"strex	%2, %1, [%3]	"
+                "ldrex        %0, [%3]        \n\t"
+                "add        %1, %0, #1        \n\t"
+                "strex        %2, %1, [%3]        "
 
-		: "=&r" (__orig), "=&r" (__res), "=&r" (__ex_flag)
-		: "r" (&(count)->counter)
-		: "cc","memory" );
+                : "=&r" (__orig), "=&r" (__res), "=&r" (__ex_flag)
+                : "r" (&(count)->counter)
+                : "cc","memory" );
 
-	__orig |= __ex_flag;
-	if (unlikely(__orig != 0))
-		fail_fn(count);
+        __orig |= __ex_flag;
+        if (unlikely(__orig != 0))
+                fail_fn(count);
 }
 
 /*
  * If the unlock was done on a contended lock, or if the unlock simply fails
  * then the mutex remains locked.
  */
-#define __mutex_slowpath_needs_to_unlock()	1
+#define __mutex_slowpath_needs_to_unlock()        1
 
 /*
  * For __mutex_fastpath_trylock we use another construct which could be
@@ -111,24 +111,24 @@ __mutex_fastpath_unlock(atomic_t *count, void (*fail_fn)(atomic_t *))
 static inline int
 __mutex_fastpath_trylock(atomic_t *count, int (*fail_fn)(atomic_t *))
 {
-	int __ex_flag, __res, __orig;
+        int __ex_flag, __res, __orig;
 
-	__asm__ (
+        __asm__ (
 
-		"1: ldrex	%0, [%3]	\n\t"
-		"subs		%1, %0, #1	\n\t"
-		"strexeq	%2, %1, [%3]	\n\t"
-		"movlt		%0, #0		\n\t"
-		"cmpeq		%2, #0		\n\t"
-		"bgt		1b		"
+                "1: ldrex        %0, [%3]        \n\t"
+                "subs                %1, %0, #1        \n\t"
+                "strexeq        %2, %1, [%3]        \n\t"
+                "movlt                %0, #0                \n\t"
+                "cmpeq                %2, #0                \n\t"
+                "bgt                1b                "
 
-		: "=&r" (__orig), "=&r" (__res), "=&r" (__ex_flag)
-		: "r" (&count->counter)
-		: "cc", "memory" );
-	if (__orig)
-		smp_rmb();
+                : "=&r" (__orig), "=&r" (__res), "=&r" (__ex_flag)
+                : "r" (&count->counter)
+                : "cc", "memory" );
+        if (__orig)
+                smp_rmb();
 
-	return __orig;
+        return __orig;
 }
 
 #endif
