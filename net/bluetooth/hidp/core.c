@@ -101,20 +101,7 @@ static void __hidp_link_session(struct hidp_session *session)
 
 static void __hidp_unlink_session(struct hidp_session *session)
 {
-	bdaddr_t *dst = &session->bdaddr;
-	struct hci_dev *hdev;
-	struct device *dev = NULL;
-
-	hdev = hci_get_route(dst, BDADDR_ANY);
-	if (hdev) {
-		session->conn = hci_conn_hash_lookup_ba(hdev, ACL_LINK, dst);
-		if (session->conn && session->conn->hidp_session_valid)
-			dev = &session->conn->dev;
-
-		hci_dev_put(hdev);
-	}
-
-	if (dev)
+	if (session->conn)
 		hci_conn_put_device(session->conn);
 
 	list_del(&session->list);
@@ -661,10 +648,8 @@ static struct hci_conn *hidp_get_connection(struct hidp_session *session)
 
 	hci_dev_lock_bh(hdev);
 	conn = hci_conn_hash_lookup_ba(hdev, ACL_LINK, dst);
-	if (conn) {
-		conn->hidp_session_valid = true;
+	if (conn)
 		hci_conn_hold_device(conn);
-	}
 	hci_dev_unlock_bh(hdev);
 
 	hci_dev_put(hdev);
@@ -816,7 +801,7 @@ static int hidp_setup_hid(struct hidp_session *session,
 	hid->version = req->version;
 	hid->country = req->country;
 
-	strncpy(hid->name, req->name, 128);
+	strncpy(hid->name, req->name, sizeof(req->name) - 1);
 	strncpy(hid->phys, batostr(&bt_sk(session->ctrl_sock->sk)->src), 64);
 	strncpy(hid->uniq, batostr(&bt_sk(session->ctrl_sock->sk)->dst), 64);
 
