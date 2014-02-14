@@ -5367,7 +5367,7 @@ static void migrate_tasks(unsigned int dead_cpu)
 	 * either way we should never end up calling schedule() until we're
 	 * done here.
 	 */
-	rq->stop = NULL;	
+	rq->stop = NULL;
 
 	for ( ; ; ) {
 		/*
